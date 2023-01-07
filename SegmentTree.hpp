@@ -43,7 +43,7 @@ private:
     {
         if (l > r)
             return 0;
-        if (l == start && r == end)
+        if (l <= start && end <= r)
             return t[v];
 
         int mid = (start + end) / 2;
