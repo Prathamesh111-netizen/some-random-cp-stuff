@@ -1,2 +1,4 @@
 **/*.exe
 **/*.txt
+segmenttree.cpp
+/.vscode
