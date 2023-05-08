@@ -1,74 +1,82 @@
-class segtree
+class segmenttree
 {
-public:
-    segtree(vector<int> _a)
-    {
-        n = _a.size();
-        a = _a;
-        t.resize(4 * n);
-        build(1, 0, n - 1);
-    }
+    vector<ll> tree, arr;
+    int size;
 
-    void update(int pos, int new_val)
-    {
-        update(1, 0, n - 1, pos, new_val);
-    }
-
-    int query(int l, int r)
-    {
-        return query(1, 0, n - 1, l, r);
-    }
-
-private:
-    int n;
-    vector<int> a, t;
-
-    void build(int v, int start, int end)
+    void build(vector<ll> &arr, int start, int end, int index)
     {
         if (start == end)
         {
-            t[v] = a[start];
+            if (start < arr.size())
+                tree[index] = arr[start];
+            else
+                tree[index] = 0;
             return;
         }
 
         int mid = (start + end) / 2;
-        build(v * 2, start, mid);
-        build(v * 2 + 1, mid + 1, end);
-
-        // change the property here : default sum
-        t[v] = t[v * 2] + t[v * 2 + 1];
+        build(arr, start, mid, 2 * index + 1);
+        build(arr, mid + 1, end, 2 * index + 2);
+        tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
     }
 
-    int query(int v, int start, int end, int l, int r)
-    {
-        if (l > r)
-            return 0;
-        if (l <= start && end <= r)
-            return t[v];
-
-        int mid = (start + end) / 2;
-
-        // change the property here : default sum
-        int result = query(v * 2, start, mid, l, min(r, mid)) + query(v * 2 + 1, mid + 1, end, max(l, mid + 1), r);
-
-        return result;
-    }
-
-    void update(int v, int start, int end, int pos, int new_val)
+    void update(int start, int end, int index, int pos, ll val)
     {
         if (start == end)
         {
-            t[v] = new_val;
+            tree[index] = val;
             return;
         }
 
         int mid = (start + end) / 2;
         if (pos <= mid)
-            update(v * 2, start, mid, pos, new_val);
+            update(start, mid, 2 * index + 1, pos, val);
         else
-            update(v * 2 + 1, mid + 1, end, pos, new_val);
+            update(mid + 1, end, 2 * index + 2, pos, val);
 
-        // change the property here : default sum
-        t[v] = t[v * 2] + t[v * 2 + 1];
+        tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
+    }
+
+    ll query(int start, int end, int index, int l, int r)
+    {
+        if (start > r || end < l)
+            return 0;
+
+        if (start >= l && end <= r)
+            return tree[index];
+
+        int mid = (start + end) / 2;
+        ll left = query(start, mid, 2 * index + 1, l, r);
+        ll right = query(mid + 1, end, 2 * index + 2, l, r);
+
+        return left + right;
+    }
+
+public:
+    segmenttree(vector<ll> a)
+    {
+        int n = a.size();
+        size  = 1;
+        while (size < n)
+            size *= 2;
+        this->arr = a;
+        tree.resize(size * 2);
+        build();
+    }
+
+    void build()
+    {
+        build(arr, 0, size - 1, 0);
+        debug(tree);
+    }
+
+    void update(int pos, ll val)
+    {
+        update(0, size - 1, 0, pos, val);
+    }
+
+    ll query(int l, int r)
+    {
+        return query(0, size - 1, 0, l, r);
     }
 };
